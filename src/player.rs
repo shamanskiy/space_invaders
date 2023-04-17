@@ -1,6 +1,7 @@
 use std::time::Duration;
-
 use crate::{NUM_COLS, NUM_ROWS, frame::{Drawable, Frame}, shot::Shot, invaders::Invaders};
+
+const NUM_SHOTS: usize = 2;
 
 pub struct Player {
   x: usize,
@@ -30,7 +31,7 @@ impl Player {
   }
 
   pub fn shoot(&mut self) -> bool{
-    if self.shots.len() < 2 {
+    if self.shots.len() < NUM_SHOTS {
       self.shots.push(Shot::new(self.x, self.y-1));
       true
     } else {
