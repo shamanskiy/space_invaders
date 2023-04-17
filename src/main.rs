@@ -1,4 +1,4 @@
-use std::{error::Error, io, time::Duration, sync::mpsc, thread};
+use std::{error::Error, io, time::{Duration, Instant}, sync::mpsc, thread};
 
 use crossterm::{terminal::{self, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand, cursor::{Hide, Show}, event::{self, Event, KeyCode}};
 use rusty_audio::Audio;
@@ -38,8 +38,11 @@ fn main() -> Result<(),Box<dyn Error>>{
     });
 
     let mut player = Player::new();
+    let mut instant = Instant::now();
     'gameloop: loop {
         // per-frame setup
+        let delta = instant.elapsed();
+        instant = Instant::now();
         let mut curr_frame = new_frame();
 
         // input
@@ -48,6 +51,11 @@ fn main() -> Result<(),Box<dyn Error>>{
                 match key_event.code {
                     KeyCode::Left | KeyCode::Char('a') => player.move_left(),
                     KeyCode::Right | KeyCode::Char('d') => player.move_right(),
+                    KeyCode::Char(' ') | KeyCode::Enter => {
+                       if player.shoot() {
+                        audio.play("pew");
+                       }
+                    },
                     KeyCode::Esc | KeyCode::Char('q') => {
                         audio.play("lose");
                         break 'gameloop;
@@ -56,6 +64,9 @@ fn main() -> Result<(),Box<dyn Error>>{
                 }
             }
         }
+
+        // Updates
+        player.update(delta);
 
         player.draw(&mut curr_frame);
         let _ = render_tx.send(curr_frame);
