@@ -13,3 +13,15 @@ cargo build & cargo build --release
 ```
 cargo run
 ```
+
+## How to format
+
+```
+cargo fmt
+```
+
+## How to lint
+
+```
+cargo clippy
+```

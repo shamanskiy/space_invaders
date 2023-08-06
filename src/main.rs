@@ -1,18 +1,34 @@
-use std::{error::Error, io, time::{Duration, Instant}, sync::mpsc, thread};
+use std::{
+    error::Error,
+    io,
+    sync::mpsc,
+    thread,
+    time::{Duration, Instant},
+};
 
-use crossterm::{terminal::{self, EnterAlternateScreen, LeaveAlternateScreen}, ExecutableCommand, cursor::{Hide, Show}, event::{self, Event, KeyCode}};
+use crossterm::{
+    cursor::{Hide, Show},
+    event::{self, Event, KeyCode},
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
+    ExecutableCommand,
+};
 use rusty_audio::Audio;
-use space_invaders::{frame::{self, new_frame, Drawable}, render::{self}, player::Player, invaders::{Invaders}};
+use space_invaders::{
+    frame::{self, new_frame, Drawable},
+    invaders::Invaders,
+    player::Player,
+    render::{self},
+};
 
-fn main() -> Result<(),Box<dyn Error>>{
+fn main() -> Result<(), Box<dyn Error>> {
     // audio setup
     let mut audio = Audio::new();
-    audio.add("explode","sounds/explode.wav");
-    audio.add("lose","sounds/lose.wav");
-    audio.add("move","sounds/move.wav");
-    audio.add("pew","sounds/pew.wav");
-    audio.add("startup","sounds/startup.wav");
-    audio.add("win","sounds/win.wav");
+    audio.add("explode", "sounds/explode.wav");
+    audio.add("lose", "sounds/lose.wav");
+    audio.add("move", "sounds/move.wav");
+    audio.add("pew", "sounds/pew.wav");
+    audio.add("startup", "sounds/startup.wav");
+    audio.add("win", "sounds/win.wav");
     audio.play("startup"); // plays in a separate thread
 
     // terminal setup
@@ -53,10 +69,10 @@ fn main() -> Result<(),Box<dyn Error>>{
                     KeyCode::Left | KeyCode::Char('a') => player.move_left(),
                     KeyCode::Right | KeyCode::Char('d') => player.move_right(),
                     KeyCode::Char(' ') | KeyCode::Enter => {
-                       if player.shoot() {
-                        audio.play("pew");
-                       }
-                    },
+                        if player.shoot() {
+                            audio.play("pew");
+                        }
+                    }
                     KeyCode::Esc | KeyCode::Char('q') => {
                         audio.play("lose");
                         break 'gameloop;
@@ -81,9 +97,9 @@ fn main() -> Result<(),Box<dyn Error>>{
         }
         let _ = render_tx.send(curr_frame);
         // this limits number of FPS we generate to not overwhelm the render thread
-        thread::sleep(Duration::from_millis(1)); 
+        thread::sleep(Duration::from_millis(1));
 
-        //win or lose 
+        //win or lose
         if invaders.all_killed() {
             audio.play("win");
             break 'gameloop;
